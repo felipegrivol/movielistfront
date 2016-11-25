@@ -1,0 +1,11 @@
+<div class="container">
+  <h1>Movie list</h1>
+
+  <ul class="list-group">
+    <li *ngFor="let movie of movies" class="list-group-item">
+      {{movie.title}}
+    </li>
+  </ul>
+
+  <a [routerLink]="['/login']" class="btn btn-default">Logout</a>
+</div>
