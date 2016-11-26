@@ -1,32 +1,50 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Rx';
 import { Router } from '@angular/router';
+import { Http, Response, Request, RequestOptions, Headers, RequestMethod } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+import 'rxjs/add/operator/map';
 
 import { Login } from '../model/login';
 
 @Injectable()
 export class LoginService {
 
-  users = [
-    new Login('felipe', 'senha')
-  ];
+  private loginUrl = 'http://localhost:3000/api/auth/login/';
 
-  constructor(private router: Router) { }
+  constructor(
+    private http: Http,
+    private router: Router
+    ) { }
 
-  login(login:Login):boolean {
-      
-    let authenticatedUser = this.users.find(u => u.user === login.user);
-    if (authenticatedUser && authenticatedUser.password === login.password){
-      localStorage.setItem("userToken", authenticatedUser.user);
-      this.router.navigate(['']);      
-      
-      return true;
-    }
+  login(login: Login): Observable<any> {
 
-    return false;
+    let options = new RequestOptions();
+
+    return this.http.post(this.loginUrl, login, options)
+    .map((response: Response) => {
+      let data = response.json();
+
+      if (!data || !data.success || !data.token) {
+          let errorMessage = '';
+          
+          if (data && data.message)
+              errorMessage = data.message;
+
+          return { success: false, message: errorMessage };
+      }
+
+      localStorage.setItem("userToken", data.token);
+      this.router.navigate(['']);
+      return { success: true }; 
+    });
   }
 
   logout() {
-    localStorage.removeItem("userToken");
+    if (localStorage.getItem("userToken")) 
+        localStorage.removeItem("userToken");
+    this.router.navigate(['/login']);
   }
 
   checkLogged() {

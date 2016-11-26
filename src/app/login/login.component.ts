@@ -11,7 +11,7 @@ import { Login } from '../model/login';
 })
 export class LoginComponent implements OnInit {
 
-  loginModel:Login = new Login('', '');
+  loginModel: Login = new Login();
   errorMsg = '';
 
   constructor(private loginService: LoginService) { }
@@ -20,10 +20,14 @@ export class LoginComponent implements OnInit {
     this.loginService.logout();
   }
 
-  login() {
-    if(!this.loginService.login(this.loginModel)) {
-      this.errorMsg = 'Failed to login.';
-    }
+  login() { 
+    this.loginService.login(this.loginModel).subscribe(
+      data => {
+          if (!data || !data.success)
+            this.errorMsg = 'Failed to login. ' + data.message; 
+        }
+    ); 
+    
   }
 
 }
